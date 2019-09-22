@@ -109,6 +109,10 @@ sub spurt_json (\[@$%]$;@) {
           : JSON::PP->new->utf8->pretty->canonical->allow_nonref->allow_blessed->convert_blessed->escape_slash;
     }
 
+    if (ref $data eq 'REF') {
+        $data = $$data;
+    }
+
     my $ext = (File::Basename::fileparse($filename, qr/\.[^.]*/xm))[2];
     $filename = "$filename.json" unless $ext;
 
