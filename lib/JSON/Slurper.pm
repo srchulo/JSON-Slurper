@@ -38,7 +38,20 @@ sub new {
 }
 
 sub slurp_json ($;@) {
-    my ($filename, @args) = @_;
+    my ($filename, $encoder) = @_;
+
+    if (defined $encoder) {
+        Carp::croak 'invalid encoder'
+          unless Scalar::Util::blessed($encoder)
+          && $encoder->can('encode')
+          && $encoder->can('decode');
+    } else {
+        $encoder = $DEFAULT_ENCODER ||=
+          JSON_XS
+          ? Cpanel::JSON::XS->new->utf8->pretty->canonical->allow_nonref->allow_blessed->convert_blessed->escape_slash
+          ->stringify_infnan
+          : JSON::PP->new->utf8->pretty->canonical->allow_nonref->allow_blessed->convert_blessed->escape_slash;
+    }
 
     my $wantarray = wantarray;
     unless (defined wantarray) {
@@ -49,17 +62,7 @@ sub slurp_json ($;@) {
     my $ext = (File::Basename::fileparse($filename, qr/\.[^.]*/xm))[2];
     $filename = "$filename.json" unless $ext;
 
-    my $slurped = (
-        defined $args[0]
-          && Scalar::Util::blessed($args[0])
-          && $args[0]->can('encode')
-          && $args[0]->can('decode') ? shift @args
-        : (
-            $DEFAULT_ENCODER ||= (
-                JSON_XS ? Cpanel::JSON::XS->new->utf8->pretty->canonical->allow_nonref->allow_blessed->convert_blessed
-                  ->escape_slash->stringify_infnan
-                : JSON::PP->new->utf8->pretty->canonical->allow_nonref->allow_blessed->convert_blessed->escape_slash
-            )))->decode(File::Slurper::read_text($filename, @args));
+    my $slurped = $encoder->decode(File::Slurper::read_binary($filename));
 
     if ($wantarray and my $ref = ref $slurped) {
         return @$slurped if $ref eq 'ARRAY';
@@ -70,7 +73,7 @@ sub slurp_json ($;@) {
 }
 
 sub slurp {
-    my ($self, $filename, @args) = @_;
+    my ($self, $filename) = @_;
 
     my $wantarray = wantarray;
     unless (defined wantarray) {
@@ -81,7 +84,7 @@ sub slurp {
     my $ext = (File::Basename::fileparse($filename, qr/\.[^.]*/xm))[2];
     $filename = "$filename.json" unless $ext;
 
-    my $slurped = $$self->decode(File::Slurper::read_text($filename, @args));
+    my $slurped = $$self->decode(File::Slurper::read_binary($filename));
     if ($wantarray and my $ref = ref $slurped) {
         return @$slurped if $ref eq 'ARRAY';
         return %$slurped if $ref eq 'HASH';
@@ -91,37 +94,34 @@ sub slurp {
 }
 
 sub spurt_json (\[@$%]$;@) {
-    my ($data, $filename, @args) = @_;
+    my ($data, $filename, $encoder) = @_;
+
+    if (defined $encoder) {
+        Carp::croak 'invalid encoder'
+          unless Scalar::Util::blessed($encoder)
+          && $encoder->can('encode')
+          && $encoder->can('decode');
+    } else {
+        $encoder = $DEFAULT_ENCODER ||=
+          JSON_XS
+          ? Cpanel::JSON::XS->new->utf8->pretty->canonical->allow_nonref->allow_blessed->convert_blessed->escape_slash
+          ->stringify_infnan
+          : JSON::PP->new->utf8->pretty->canonical->allow_nonref->allow_blessed->convert_blessed->escape_slash;
+    }
 
     my $ext = (File::Basename::fileparse($filename, qr/\.[^.]*/xm))[2];
     $filename = "$filename.json" unless $ext;
 
-    File::Slurper::write_text(
-        $filename,
-        (
-            defined $args[0]
-              && Scalar::Util::blessed($args[0])
-              && $args[0]->can('encode')
-              && $args[0]->can('decode') ? shift @args
-            : (
-                $DEFAULT_ENCODER ||= (
-                    JSON_XS
-                    ? Cpanel::JSON::XS->new->utf8->pretty->canonical->allow_nonref->allow_blessed->convert_blessed
-                      ->escape_slash->stringify_infnan
-                    : JSON::PP->new->utf8->pretty->canonical->allow_nonref->allow_blessed->convert_blessed->escape_slash
-                ))
-        )->encode($data),
-        @args,
-    );
+    File::Slurper::write_binary($filename, $encoder->encode($data));
 }
 
 sub spurt {
-    my ($self, $data, $filename, @args) = @_;
+    my ($self, $data, $filename) = @_;
 
     my $ext = (File::Basename::fileparse($filename, qr/\.[^.]*/xm))[2];
     $filename = "$filename.json" unless $ext;
 
-    File::Slurper::write_text($filename, $$self->encode($data), @args);
+    File::Slurper::write_binary($filename, $$self->encode($data));
 }
 
 1;
@@ -181,7 +181,6 @@ JSON::Slurper - Convenient file slurping and spurting of data using JSON
 =head1 DESCRIPTION
 
 JSON::Slurper is a convenient way to slurp/spurt (read/write) Perl data structures to and from JSON files. It tries to do what you mean, and allows you to provide your own JSON encoder/decoder if necessary.
-You can also pass along extra options to L<File::Slurper/read_text> and L<File::Slurper/write_text>, which are the two methods used by this module to read and write JSON.
 
 =head1 DEFAULT ENCODER
 
@@ -220,7 +219,7 @@ If you are using L<JSON::PP>, this is the default used:
 
 =over 4
 
-=item slurp_json [$json_encoder], $filename, [@args for File::Slurper::read_text]
+=item slurp_json $filename, [$json_encoder]
 
 =back
 
@@ -233,24 +232,20 @@ If you are using L<JSON::PP>, this is the default used:
   my %hash = slurp_json 'hash.json';
 
   # You can pass your own JSON encoder
-  my $ref = slurp_json JSON::PP->new->ascii->pretty, 'ref.json';
-
-  # You can pass options to File::Slurper::read_text
-  my $ref = slurp_json 'ref.json', $encoding, $crlf;
+  my $ref = slurp_json 'ref.json', JSON::PP->new->ascii->pretty;
 
   # If no extension is provided, ".json" will be used.
   # Reads from "ref.json";
   my $ref = slurp_json 'ref';
 
-This reads in JSON from a file and returns it as a Perl data structure (a reference, an array, or a hash). You can pass in your own JSON encoder/decoder as an optional first argument, as long as it is blessed
-and has C<encode> and C<decode> methods. You may also pass extra arguments at the end that will be passed on to L<File::Slurper/read_text>. By default, no additional arguments are
-passed to L<File::Slurper/read_text>. If no extension is present on the filename, C<.ext> will be added.
+This reads in JSON from a file and returns it as a Perl data structure (a reference, an array, or a hash). You can pass in your own JSON encoder/decoder as an optional argument, as long as it is blessed
+and has C<encode> and C<decode> methods. If no extension is present on the filename, C<.json> will be added.
 
 =head2 spurt_json
 
 =over 4
 
-=item spurt_json [$json_encoder], $data, $filename, [@args for File::Slurper::write_text]
+=item spurt_json $data, $filename, [$json_encoder]
 
 =back
 
@@ -263,18 +258,14 @@ passed to L<File::Slurper/read_text>. If no extension is present on the filename
   spurt_json %hash, 'hash.json';
 
   # You can pass your own JSON encoder
-  spurt_json JSON::PP->new->ascii->pretty, $ref, 'ref.json';
-
-  # You can pass options to File::Slurper::write_text
-  spurt_json $ref, 'ref.json', $encoding, $crlf;
+  spurt_json $ref, 'ref.json', JSON::PP->new->ascii->pretty;
 
   # If no extension is provided, ".json" will be used.
   # Writes to "ref.json";
   spurt_json $ref, 'ref';
 
-This reads in JSON from a file and returns it as a Perl data structure (a reference, an array, or a hash). You can pass in your own JSON encoder/decoder as an optional first argument, as long as it is blessed
-and has C<encode> and C<decode> methods. You may also pass extra arguments at the end that will be passed on to L<File::Slurper/write_text>. By default, no additional arguments are
-passed to L<File::Slurper/write_text>. If no extension is present on the filename, C<.ext> will be added.
+This reads in JSON from a file and returns it as a Perl data structure (a reference, an array, or a hash). You can pass in your own JSON encoder/decoder as an optional argument, as long as it is blessed
+and has C<encode> and C<decode> methods. If no extension is present on the filename, C<.json> will be added.
 
 =head1 OBJECT-ORIENTED INTERFACE
 
@@ -292,7 +283,7 @@ C<encode> and C<decode> methods, like L<JSON::PP> or L<Cpanel::JSON::XS>, and th
 
 =over 4
 
-=item slurp($filename, [@args for File::Slurper::read_text])
+=item slurp($filename)
 
 =back
 
@@ -304,22 +295,18 @@ C<encode> and C<decode> methods, like L<JSON::PP> or L<Cpanel::JSON::XS>, and th
 
   my %hash = $json_slurper->slurp('hash.json');
 
-  # You can pass options to File::Slurper::read_text
-  my $ref = $json_slurper->slurp('ref.json', $encoding, $crlf);
-
   # If no extension is provided, ".json" will be used.
   # Reads from "ref.json";
   my $ref = $json_slurper->slurp('ref');
 
 This reads in JSON from a file and returns it as a Perl data structure (a reference, an array, or a hash).
-You may pass extra arguments at the end that will be passed on to L<File::Slurper/read_text>. By default, no additional arguments are
-passed to L<File::Slurper/read_text>. If no extension is present on the filename, C<.ext> will be added.
+If no extension is present on the filename, C<.json> will be added.
 
 =head2 spurt
 
 =over 4
 
-=item spurt($data, $filename, [@args for File::Slurper::write_text])
+=item spurt($data, $filename)
 
 =back
 
@@ -327,16 +314,12 @@ passed to L<File::Slurper/read_text>. If no extension is present on the filename
 
   $json_slurper->spurt(\%hash, 'hash.json');
 
-  # You can pass options to File::Slurper::write_text
-  $json_slurper->spurt($ref, 'ref.json', $encoding, $crlf);
-
   # If no extension is provided, ".json" will be used.
   # Writes to "ref.json";
   $json_slurper->spurt($ref, 'ref');
 
 This reads in JSON from a file and returns it as a Perl data structure (a reference, an array, or a hash).
-You may pass extra arguments at the end that will be passed on to L<File::Slurper/write_text>. By default, no additional arguments are
-passed to L<File::Slurper/write_text>. If no extension is present on the filename, C<.ext> will be added.
+If no extension is present on the filename, C<.json> will be added.
 
 =head1 TODO
 
