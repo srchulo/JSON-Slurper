@@ -52,7 +52,6 @@ JSON::Slurper - Convenient file slurping and spurting of data using JSON
 # DESCRIPTION
 
 JSON::Slurper is a convenient way to slurp/spurt (read/write) Perl data structures to and from JSON files. It tries to do what you mean, and allows you to provide your own JSON encoder/decoder if necessary.
-You can also pass along extra options to ["read\_text" in File::Slurper](https://metacpan.org/pod/File::Slurper#read_text) and ["write\_text" in File::Slurper](https://metacpan.org/pod/File::Slurper#write_text), which are the two methods used by this module to read and write JSON.
 
 # DEFAULT ENCODER
 
@@ -89,7 +88,7 @@ If you are using [JSON::PP](https://metacpan.org/pod/JSON::PP), this is the defa
 
 ## slurp\_json
 
-- slurp\_json \[$json\_encoder\], $filename, \[@args for File::Slurper::read\_text\]
+- slurp\_json $filename, \[$json\_encoder\]
 
     # values can be returned as refs
     my $ref = slurp_json 'ref.json';
@@ -100,22 +99,18 @@ If you are using [JSON::PP](https://metacpan.org/pod/JSON::PP), this is the defa
     my %hash = slurp_json 'hash.json';
 
     # You can pass your own JSON encoder
-    my $ref = slurp_json JSON::PP->new->ascii->pretty, 'ref.json';
-
-    # You can pass options to File::Slurper::read_text
-    my $ref = slurp_json 'ref.json', $encoding, $crlf;
+    my $ref = slurp_json 'ref.json', JSON::PP->new->ascii->pretty;
 
     # If no extension is provided, ".json" will be used.
     # Reads from "ref.json";
     my $ref = slurp_json 'ref';
 
-This reads in JSON from a file and returns it as a Perl data structure (a reference, an array, or a hash). You can pass in your own JSON encoder/decoder as an optional first argument, as long as it is blessed
-and has `encode` and `decode` methods. You may also pass extra arguments at the end that will be passed on to ["read\_text" in File::Slurper](https://metacpan.org/pod/File::Slurper#read_text). By default, no additional arguments are
-passed to ["read\_text" in File::Slurper](https://metacpan.org/pod/File::Slurper#read_text). If no extension is present on the filename, `.ext` will be added.
+This reads in JSON from a file and returns it as a Perl data structure (a reference, an array, or a hash). You can pass in your own JSON encoder/decoder as an optional argument, as long as it is blessed
+and has `encode` and `decode` methods. If no extension is present on the filename, `.json` will be added.
 
 ## spurt\_json
 
-- spurt\_json \[$json\_encoder\], $data, $filename, \[@args for File::Slurper::write\_text\]
+- spurt\_json $data, $filename, \[$json\_encoder\]
 
     # values can be passed as refs
     spurt_json \@array, 'ref.json';
@@ -126,18 +121,14 @@ passed to ["read\_text" in File::Slurper](https://metacpan.org/pod/File::Slurper
     spurt_json %hash, 'hash.json';
 
     # You can pass your own JSON encoder
-    spurt_json JSON::PP->new->ascii->pretty, $ref, 'ref.json';
-
-    # You can pass options to File::Slurper::write_text
-    spurt_json $ref, 'ref.json', $encoding, $crlf;
+    spurt_json $ref, 'ref.json', JSON::PP->new->ascii->pretty;
 
     # If no extension is provided, ".json" will be used.
     # Writes to "ref.json";
     spurt_json $ref, 'ref';
 
-This reads in JSON from a file and returns it as a Perl data structure (a reference, an array, or a hash). You can pass in your own JSON encoder/decoder as an optional first argument, as long as it is blessed
-and has `encode` and `decode` methods. You may also pass extra arguments at the end that will be passed on to ["write\_text" in File::Slurper](https://metacpan.org/pod/File::Slurper#write_text). By default, no additional arguments are
-passed to ["write\_text" in File::Slurper](https://metacpan.org/pod/File::Slurper#write_text). If no extension is present on the filename, `.ext` will be added.
+This reads in JSON from a file and returns it as a Perl data structure (a reference, an array, or a hash). You can pass in your own JSON encoder/decoder as an optional argument, as long as it is blessed
+and has `encode` and `decode` methods. If no extension is present on the filename, `.json` will be added.
 
 # OBJECT-ORIENTED INTERFACE
 
@@ -153,7 +144,7 @@ passed to ["write\_text" in File::Slurper](https://metacpan.org/pod/File::Slurpe
 
 ## slurp
 
-- slurp($filename, \[@args for File::Slurper::read\_text\])
+- slurp($filename)
 
     # values can be returned as refs
     my $ref = $json_slurper->slurp('ref.json');
@@ -163,35 +154,27 @@ passed to ["write\_text" in File::Slurper](https://metacpan.org/pod/File::Slurpe
 
     my %hash = $json_slurper->slurp('hash.json');
 
-    # You can pass options to File::Slurper::read_text
-    my $ref = $json_slurper->slurp('ref.json', $encoding, $crlf);
-
     # If no extension is provided, ".json" will be used.
     # Reads from "ref.json";
     my $ref = $json_slurper->slurp('ref');
 
 This reads in JSON from a file and returns it as a Perl data structure (a reference, an array, or a hash).
-You may pass extra arguments at the end that will be passed on to ["read\_text" in File::Slurper](https://metacpan.org/pod/File::Slurper#read_text). By default, no additional arguments are
-passed to ["read\_text" in File::Slurper](https://metacpan.org/pod/File::Slurper#read_text). If no extension is present on the filename, `.ext` will be added.
+If no extension is present on the filename, `.json` will be added.
 
 ## spurt
 
-- spurt($data, $filename, \[@args for File::Slurper::write\_text\])
+- spurt($data, $filename)
 
     $json_slurper->spurt(\@array, 'array.json');
 
     $json_slurper->spurt(\%hash, 'hash.json');
-
-    # You can pass options to File::Slurper::write_text
-    $json_slurper->spurt($ref, 'ref.json', $encoding, $crlf);
 
     # If no extension is provided, ".json" will be used.
     # Writes to "ref.json";
     $json_slurper->spurt($ref, 'ref');
 
 This reads in JSON from a file and returns it as a Perl data structure (a reference, an array, or a hash).
-You may pass extra arguments at the end that will be passed on to ["write\_text" in File::Slurper](https://metacpan.org/pod/File::Slurper#write_text). By default, no additional arguments are
-passed to ["write\_text" in File::Slurper](https://metacpan.org/pod/File::Slurper#write_text). If no extension is present on the filename, `.ext` will be added.
+If no extension is present on the filename, `.json` will be added.
 
 # TODO
 

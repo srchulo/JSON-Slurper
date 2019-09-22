@@ -2,5 +2,9 @@ Revision history for JSON-Slurper
 
 {{$NEXT}}
 
+0.02  2019-09-21 19:10:01 CDT
+        - Use read_binary/write_binary to avoid double encoding/decoding (Fixes #1)
+        - Documentation fixes.
+
 0.01  2019-09-21 18:03:38 CDT
         - Initial release

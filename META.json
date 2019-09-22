@@ -56,7 +56,8 @@
          "requires" : {
             "FindBin" : "0",
             "Test::Exception" : "0",
-            "Test::More" : "0.96"
+            "Test::More" : "0.96",
+            "Test::Pod" : "0"
          }
       }
    },
@@ -72,7 +73,7 @@
          "web" : "https://github.com/srchulo/JSON-Slurper"
       }
    },
-   "version" : "0.01",
+   "version" : "0.02",
    "x_contributors" : [
       "Adam Hopkins <violapiratejunky@gmail.com>"
    ],
