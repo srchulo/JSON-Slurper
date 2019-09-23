@@ -109,7 +109,7 @@ sub spurt_json (\[@$%]$;@) {
           : JSON::PP->new->utf8->pretty->canonical->allow_nonref->allow_blessed->convert_blessed->escape_slash;
     }
 
-    if (ref $data eq 'REF') {
+    if (ref $data eq 'REF' or ref $data eq 'SCALAR') {
         $data = $$data;
     }
 
