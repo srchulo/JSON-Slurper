@@ -1,6 +1,9 @@
 Revision history for JSON-Slurper
 
 {{$NEXT}}
+        - Add auto_ext flag/constructor arg to fix #2.
+        - new now takes in named arguments.
+        - Remove pointless $ext variable.
 
 0.04  2019-09-23 04:41:15 CDT
         - Allow scalars to be passed to spurt_json.
