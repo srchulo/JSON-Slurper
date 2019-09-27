@@ -1,6 +1,7 @@
 Revision history for JSON-Slurper
 
 {{$NEXT}}
+        - Add 'flag' after -auto_ext in documentation.
 
 0.05  2019-09-26 22:38:51 CDT
         - Add auto_ext flag/constructor arg to fix #2.
