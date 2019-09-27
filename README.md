@@ -105,6 +105,10 @@ Passing the `-auto_ext` flag with the imports causes `.json` to be added to file
     # Writes to "ref.json";
     spurt_json $ref, 'ref';
 
+    # If an extension is present, ".json" will not be added.
+    # Writes to "ref.txt";
+    spurt_json $ref, 'ref.txt';
+
 ## slurp\_json
 
 - slurp\_json $filename, \[$json\_encoder\]
@@ -172,15 +176,15 @@ Passing `auto_ext` with a `true` value causes `.json` to be added to filenames w
     my $json_slurper = JSON::Slurper->new(auto_ext => 1)
 
     # Reads from "ref.json";
-    my $ref = slurp_json 'ref';
+    my $ref = $json_slurper->slurp('ref');
 
     # If no extension is provided, ".json" will be used.
     # Writes to "ref.json";
-    spurt_json $ref, 'ref';
+    $json_slurper->spurt($ref, 'ref');
 
     # If an extension is present, ".json" will not be added.
     # Writes to "ref.txt";
-    spurt_json $ref, 'ref.txt';
+    $json_slurper->spurt($ref, 'ref.txt');
 
 ## slurp
 
@@ -194,10 +198,6 @@ Passing `auto_ext` with a `true` value causes `.json` to be added to filenames w
 
     my %hash = $json_slurper->slurp('hash.json');
 
-    # If no extension is provided, ".json" will be used.
-    # Reads from "ref.json";
-    my $ref = $json_slurper->slurp('ref');
-
 This reads in JSON from a file and returns it as a Perl data structure (a reference, an array, or a hash).
 
 ## spurt
@@ -207,10 +207,6 @@ This reads in JSON from a file and returns it as a Perl data structure (a refere
     $json_slurper->spurt(\@array, 'array.json');
 
     $json_slurper->spurt(\%hash, 'hash.json');
-
-    # If no extension is provided, ".json" will be used.
-    # Writes to "ref.json";
-    $json_slurper->spurt($ref, 'ref');
 
 This reads in JSON from a file and returns it as a Perl data structure (a reference, an array, or a hash).
 
