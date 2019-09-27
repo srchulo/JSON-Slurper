@@ -241,7 +241,7 @@ If you are using L<JSON::PP>, this is the default used:
 
 =head2 -auto_ext
 
-Passing the C<-auto_ext> with the imports causes C<.json> to be added to filenames when they have no extension.
+Passing the C<-auto_ext> flag with the imports causes C<.json> to be added to filenames when they have no extension.
 
   use JSON::Slurper qw(-auto_ext slurp_json spurt_json);
 
