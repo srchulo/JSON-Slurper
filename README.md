@@ -94,7 +94,7 @@ If you are using [JSON::PP](https://metacpan.org/pod/JSON::PP), this is the defa
 
 ## -auto\_ext
 
-Passing the `-auto_ext` with the imports causes `.json` to be added to filenames when they have no extension.
+Passing the `-auto_ext` flag with the imports causes `.json` to be added to filenames when they have no extension.
 
     use JSON::Slurper qw(-auto_ext slurp_json spurt_json);
 
