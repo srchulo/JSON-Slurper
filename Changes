@@ -1,6 +1,8 @@
 Revision history for JSON-Slurper
 
 {{$NEXT}}
+
+0.05  2019-09-26 22:38:51 CDT
         - Add auto_ext flag/constructor arg to fix #2.
         - new now takes in named arguments.
         - Remove pointless $ext variable.
