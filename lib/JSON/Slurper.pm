@@ -7,7 +7,7 @@ use File::Basename ();
 use File::Slurper  ();
 use Scalar::Util   ();
 
-our $VERSION   = '0.06';
+our $VERSION   = '0.07';
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(slurp_json spurt_json);
 
