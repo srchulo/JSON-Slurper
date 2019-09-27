@@ -1,6 +1,7 @@
 Revision history for JSON-Slurper
 
 {{$NEXT}}
+        - The -auto_ext flag is no longer global and depends on the package of the caller. Fixes #3. Thanks @tobyink.
 
 0.06  2019-09-26 23:41:05 CDT
         - Add 'flag' after -auto_ext in documentation.

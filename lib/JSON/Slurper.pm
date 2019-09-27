@@ -15,7 +15,7 @@ use constant JSON_XS => $ENV{JSON_SLURPER_NO_JSON_XS}                           
                       : eval { require Cpanel::JSON::XS; Cpanel::JSON::XS->VERSION('4.09'); 1 } ? 1
                       : do { require JSON::PP; undef };
 my $DEFAULT_ENCODER;
-my $AUTO_EXT;
+my %AUTO_EXT;
 
 sub new {
     my ($class, %args) = @_;
@@ -42,7 +42,7 @@ sub new {
 
 sub import {
     my @args_without_flags = grep { $_ ne '-auto_ext' } @_;
-    $AUTO_EXT = @_ != @args_without_flags;
+    $AUTO_EXT{+caller} = @_ != @args_without_flags;
 
     $_[0]->export_to_level(1, @args_without_flags);
 }
@@ -69,7 +69,7 @@ sub slurp_json ($;@) {
         return;
     }
 
-    if ($AUTO_EXT and not ((File::Basename::fileparse($filename, qr/\.[^.]*/xm))[2])) {
+    if ($AUTO_EXT{+caller} and not ((File::Basename::fileparse($filename, qr/\.[^.]*/xm))[2])) {
         $filename = "$filename.json";
     }
 
@@ -125,7 +125,7 @@ sub spurt_json (\[@$%]$;@) {
         $data = $$data;
     }
 
-    if ($AUTO_EXT and not ((File::Basename::fileparse($filename, qr/\.[^.]*/xm))[2])) {
+    if ($AUTO_EXT{+caller} and not ((File::Basename::fileparse($filename, qr/\.[^.]*/xm))[2])) {
         $filename = "$filename.json";
     }
 
