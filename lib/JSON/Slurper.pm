@@ -252,6 +252,10 @@ Passing the C<-auto_ext> flag with the imports causes C<.json> to be added to fi
   # Writes to "ref.json";
   spurt_json $ref, 'ref';
 
+  # If an extension is present, ".json" will not be added.
+  # Writes to "ref.txt";
+  spurt_json $ref, 'ref.txt';
+
 =head2 slurp_json
 
 =over 4
@@ -327,15 +331,15 @@ Passing C<auto_ext> with a C<true> value causes C<.json> to be added to filename
   my $json_slurper = JSON::Slurper->new(auto_ext => 1)
 
   # Reads from "ref.json";
-  my $ref = slurp_json 'ref';
+  my $ref = $json_slurper->slurp('ref');
 
   # If no extension is provided, ".json" will be used.
   # Writes to "ref.json";
-  spurt_json $ref, 'ref';
+  $json_slurper->spurt($ref, 'ref');
 
   # If an extension is present, ".json" will not be added.
   # Writes to "ref.txt";
-  spurt_json $ref, 'ref.txt';
+  $json_slurper->spurt($ref, 'ref.txt');
 
 =head2 slurp
 
@@ -353,10 +357,6 @@ Passing C<auto_ext> with a C<true> value causes C<.json> to be added to filename
 
   my %hash = $json_slurper->slurp('hash.json');
 
-  # If no extension is provided, ".json" will be used.
-  # Reads from "ref.json";
-  my $ref = $json_slurper->slurp('ref');
-
 This reads in JSON from a file and returns it as a Perl data structure (a reference, an array, or a hash).
 
 =head2 spurt
@@ -370,10 +370,6 @@ This reads in JSON from a file and returns it as a Perl data structure (a refere
   $json_slurper->spurt(\@array, 'array.json');
 
   $json_slurper->spurt(\%hash, 'hash.json');
-
-  # If no extension is provided, ".json" will be used.
-  # Writes to "ref.json";
-  $json_slurper->spurt($ref, 'ref');
 
 This reads in JSON from a file and returns it as a Perl data structure (a reference, an array, or a hash).
 
