@@ -11,6 +11,8 @@ JSON::Slurper - Convenient file slurping and spurting of data using JSON
 # SYNOPSIS
 
     use JSON::Slurper qw(slurp_json spurt_json);
+    # or
+    use JSON::Slurper -std;
 
     my @people = (
       {
@@ -45,6 +47,8 @@ JSON::Slurper - Convenient file slurping and spurting of data using JSON
     # use the -auto_ext flag so that ".json" is added as the
     # file extension if no file extension is present.
     use JSON::Slurper qw(-auto_ext slurp_json spurt_json);
+    # or
+    use JSON::Slurper -std_auto;
 
     # This saves to people.json
     spurt_json @people, 'people';
@@ -98,6 +102,10 @@ Passing the `-auto_ext` flag with the imports causes `.json` to be added to file
 
     use JSON::Slurper qw(-auto_ext slurp_json spurt_json);
 
+    # or
+
+    use JSON::Slurper -std_auto;
+
     # Reads from "ref.json";
     my $ref = slurp_json 'ref';
 
@@ -146,6 +154,62 @@ and has `encode` and `decode` methods.
 This reads in JSON from a file and returns it as a Perl data structure (a reference, an array, or a hash).
 You can pass in your own JSON encoder/decoder as an optional argument, as long as it is blessed
 and has `encode` and `decode` methods.
+
+## Export Tags
+
+### -std
+
+This tag is the same as explicitly importing ["slurp\_json"](#slurp_json) and ["spurt\_json"](#spurt_json):
+
+    use JSON::Slurper -std;
+
+    # same as
+
+    use JSON::Slurper qw(slurp_json spurt_json);
+
+### -std\_auto
+
+This tag is the same as explicitly importing ["slurp\_json"](#slurp_json) and ["spurt\_json"](#spurt_json) and including the ["-auto\_ext"](#auto_ext) flag:
+
+    use JSON::Slurper -std_auto;
+
+    # same as
+
+    use JSON::Slurper qw(-auto_ext slurp_json spurt_json);
+
+### -slurp\_auto
+
+This tag is the same as explicitly importing ["slurp\_json"](#slurp_json) and including the ["-auto\_ext"](#auto_ext) flag:
+
+    use JSON::Slurper -slurp_auto;
+
+    # same as
+
+    use JSON::Slurper qw(-auto_ext slurp_json);
+
+### -spurt\_auto
+
+This tag is the same as explicitly importing ["spurt\_json"](#spurt_json) and including the ["-auto\_ext"](#auto_ext) flag:
+
+    use JSON::Slurper -spurt_auto;
+
+    # same as
+
+    use JSON::Slurper qw(-auto_ext spurt_json);
+
+## Shiny Importing
+
+[JSON::Slurper](https://metacpan.org/pod/JSON::Slurper) uses [Exporter::Shiny](https://metacpan.org/pod/Exporter::Shiny) for its exporting of subroutines. This allows for fancy importing, such as
+renaming imported subroutines:
+
+    use JSON::Slurper
+      'slurp_json' => { -as => 'slurp_plz' },
+      'spurt_json' => { -as => 'spurt_plz' };
+
+    spurt_plz $ref, 'ref.json';
+    my $ref_from_file = slurp_plz 'ref.json';
+
+See [Exporter::Tiny::Manual::Importing](https://metacpan.org/pod/Exporter::Tiny::Manual::Importing) for much more.
 
 # OBJECT-ORIENTED INTERFACE
 
@@ -232,3 +296,4 @@ it under the same terms as Perl itself.
 - [File::Slurper](https://metacpan.org/pod/File::Slurper)
 - [JSON::PP](https://metacpan.org/pod/JSON::PP)
 - [Cpanel::JSON::XS](https://metacpan.org/pod/Cpanel::JSON::XS)
+- [Exporter::Tiny::Manual::Importing](https://metacpan.org/pod/Exporter::Tiny::Manual::Importing)
