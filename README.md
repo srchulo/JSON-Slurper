@@ -27,7 +27,7 @@ JSON::Slurper - Convenient file slurping and spurting of data using JSON
       },
     );
 
-    spurt_json @people, 'people.json';
+    spurt_json \@people, 'people.json';
 
     my @people_from_file = slurp_json 'people.json';
 
@@ -51,7 +51,7 @@ JSON::Slurper - Convenient file slurping and spurting of data using JSON
     use JSON::Slurper -std_auto;
 
     # This saves to people.json
-    spurt_json @people, 'people';
+    spurt_json \@people, 'people';
 
     # This reads from people.json
     my @people_from_file = slurp_json 'people';
@@ -140,13 +140,15 @@ and has `encode` and `decode` methods.
 
 - spurt\_json $data, $filename, \[$json\_encoder\]
 
-    # values can be passed as refs
+    # data must be passed as references or scalars
     spurt_json \@array, 'ref.json';
 
-    # or as an array or hash (still passed as refs using prototypes)
-    spurt_json @array, 'array.json';
+    spurt_json 'string', 'ref.json';
 
-    spurt_json %hash, 'hash.json';
+    # pass anonymous array or hash refs
+    spurt_json [1, 2, 3], 'ref.json';
+
+    spurt_json {key => 'value'}, 'ref.json';
 
     # You can pass your own JSON encoder
     spurt_json $ref, 'ref.json', JSON::PP->new->ascii->pretty;

@@ -1,6 +1,8 @@
 Revision history for JSON-Slurper
 
 {{$NEXT}}
+
+0.10  2019-10-17 12:19:17 CDT
         - Remove ability to pass arrays and hashes via prototypes. Now anonymous arrays and hashes may be provided.
 
 0.09  2019-10-03 21:20:39 CDT
