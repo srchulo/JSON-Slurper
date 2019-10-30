@@ -1,6 +1,8 @@
 Revision history for JSON-Slurper
 
 {{$NEXT}}
+
+0.12  2019-10-30 10:44:07 CDT
         - Factor out creation of default encoder into a method. (@tobyink)
         - Avoids loading JSON::PP or Cpanel::JSON::XS unless they're needed. (@tobyink)
 
