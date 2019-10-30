@@ -15,10 +15,22 @@ our %EXPORT_TAGS = (
     spurt_auto => [qw(-auto_ext spurt_json)],
 );
 
-use constant JSON_XS => $ENV{JSON_SLURPER_NO_JSON_XS}                                          ? do { require JSON::PP; undef }
-                     : eval { require Cpanel::JSON::XS; Cpanel::JSON::XS->VERSION('4.09'); 1 } ? 1
-                     : do { require JSON::PP; undef };
 my $DEFAULT_ENCODER;
+sub _build_default_encoder {
+    my $e_class = $ENV{JSON_SLURPER_NO_JSON_XS} ? do { require JSON::PP; 'JSON::PP' }
+        : eval { require Cpanel::JSON::XS; Cpanel::JSON::XS->VERSION('4.09'); 1 } ? 'Cpanel::JSON::XS'
+        : do { require JSON::PP; 'JSON::PP' };
+    my $encoder = $e_class->new
+        ->utf8
+        ->pretty
+        ->canonical
+        ->allow_nonref
+        ->allow_blessed
+        ->convert_blessed
+        ->escape_slash;
+    $encoder->stringify_infnan if $e_class eq 'Cpanel::JSON::XS';
+    return $encoder;
+}
 
 sub new {
     my ($class, %args) = @_;
@@ -27,11 +39,7 @@ sub new {
     if (exists $args{encoder}) {
         $encoder = _validate_encoder(delete $args{encoder});
     } else {
-        $encoder = $DEFAULT_ENCODER ||=
-          JSON_XS
-          ? Cpanel::JSON::XS->new->utf8->pretty->canonical->allow_nonref->allow_blessed->convert_blessed->escape_slash
-          ->stringify_infnan
-          : JSON::PP->new->utf8->pretty->canonical->allow_nonref->allow_blessed->convert_blessed->escape_slash;
+        $encoder = ($DEFAULT_ENCODER ||= $class->_build_default_encoder);
     }
 
     my $auto_ext = delete $args{auto_ext};
@@ -42,6 +50,7 @@ sub new {
 }
 
 sub _generate_slurp_json {
+    my ($class) = @_;
     my $auto_ext          = exists $_[3]->{auto_ext};
     my $imported_encoder  = exists $_[3]->{encoder} ? _validate_encoder($_[3]->{encoder}) : undef;
 
@@ -53,12 +62,7 @@ sub _generate_slurp_json {
         } elsif ($imported_encoder) {
             $encoder = $imported_encoder;
         } else {
-            $encoder = $DEFAULT_ENCODER ||=
-              JSON_XS
-              ? Cpanel::JSON::XS->new->utf8->pretty->canonical->allow_nonref->allow_blessed->convert_blessed
-              ->escape_slash
-              ->stringify_infnan
-              : JSON::PP->new->utf8->pretty->canonical->allow_nonref->allow_blessed->convert_blessed->escape_slash;
+            $encoder = ($DEFAULT_ENCODER ||= $class->_build_default_encoder);
         }
 
         my $wantarray = wantarray;
@@ -105,6 +109,7 @@ sub slurp {
 }
 
 sub _generate_spurt_json {
+    my ($class) = @_;
     my $auto_ext          = exists $_[3]->{auto_ext};
     my $imported_encoder  = exists $_[3]->{encoder} ? _validate_encoder($_[3]->{encoder}) : undef;
 
@@ -116,12 +121,7 @@ sub _generate_spurt_json {
         } elsif ($imported_encoder) {
             $encoder = $imported_encoder;
         } else {
-            $encoder = $DEFAULT_ENCODER ||=
-              JSON_XS
-              ? Cpanel::JSON::XS->new->utf8->pretty->canonical->allow_nonref->allow_blessed->convert_blessed
-              ->escape_slash
-              ->stringify_infnan
-              : JSON::PP->new->utf8->pretty->canonical->allow_nonref->allow_blessed->convert_blessed->escape_slash;
+            $encoder = ($DEFAULT_ENCODER ||= $class->_build_default_encoder);
         }
 
         if ($auto_ext and not ((File::Basename::fileparse($filename, qr/\.[^.]*/xm))[2])) {
