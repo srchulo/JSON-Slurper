@@ -7,7 +7,7 @@ use File::Basename ();
 use File::Slurper  ();
 use Scalar::Util   ();
 
-our $VERSION     = '0.10';
+our $VERSION     = '0.11';
 our %EXPORT_TAGS = (
     std      => [qw(slurp_json spurt_json)],
     std_auto => [qw(-auto_ext slurp_json spurt_json)],

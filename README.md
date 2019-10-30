@@ -59,6 +59,15 @@ JSON::Slurper - Convenient file slurping and spurting of data using JSON
     # auto_ext can also be passed when using the object-oriented interface:
     my $json_slurper = JSON::Slurper->new(auto_ext => 1);
 
+
+    # provide an encoder on import to use with spurt_json and slurp_json
+    use JSON::Slurper -encoder => JSON::PP->new->pretty, qw(slurp_json spurt_json);
+
+    # use encoder passed in above
+    spurt_json \@people, 'people.json';
+
+    my @people_from_file = slurp_json 'people.json';
+
 # DESCRIPTION
 
 JSON::Slurper is a convenient way to slurp/spurt (read/write) Perl data structures to and from JSON files. It tries to do what you mean, and allows you to provide your own JSON encoder/decoder if necessary.
@@ -117,6 +126,20 @@ Passing the `-auto_ext` flag with the imports causes `.json` to be added to file
     # Writes to "ref.txt";
     spurt_json $ref, 'ref.txt';
 
+## -encoder
+
+You can use `-encoder` at import time to pass the encoder that will be used with ["slurp\_json"](#slurp_json) and ["spurt\_json"](#spurt_json).
+If you provide an encoder to the function call, it will override any encoder passed in at import
+time.
+
+    use JSON::Slurper -encoder => JSON::PP->new->pretty, 'spurt_json';
+
+    # uses encoder passed in above
+    spurt_json \@people, 'people.json';
+
+    # use the encoder passed in below to spurt_json instead of the one passed in on import
+    spurt_json \@people, 'people.json', JSON::PP->new->ascii;
+
 ## slurp\_json
 
 - slurp\_json $filename, \[$json\_encoder\]
@@ -134,7 +157,8 @@ Passing the `-auto_ext` flag with the imports causes `.json` to be added to file
 
 This reads in JSON from a file and returns it as a Perl data structure (a reference, an array, or a hash).
 You can pass in your own JSON encoder/decoder as an optional argument, as long as it is blessed
-and has `encode` and `decode` methods.
+and has `encode` and `decode` methods. Any encoder passed in will override an encoder provided during import
+via ["-encoder"](#encoder).
 
 ## spurt\_json
 
@@ -155,7 +179,8 @@ and has `encode` and `decode` methods.
 
 This reads in JSON from a file and returns it as a Perl data structure (a reference, an array, or a hash).
 You can pass in your own JSON encoder/decoder as an optional argument, as long as it is blessed
-and has `encode` and `decode` methods.
+and has `encode` and `decode` methods. Any encoder passed in will override an encoder provided during import
+via ["-encoder"](#encoder).
 
 ## Export Tags
 
